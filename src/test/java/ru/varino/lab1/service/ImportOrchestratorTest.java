@@ -43,16 +43,15 @@ class ImportOrchestratorTest {
     }
 
     @Test
-    void historyFailureDoesNotReplaceOriginalImportFailure() throws Exception {
+    void historyFailurePropagatesToCaller() throws Exception {
         var original = new RuntimeException("Ошибка импорта");
         var historyFailure = new RuntimeException("История недоступна");
         var orchestrator = orchestrator(failingImport(original), new HistoryService() {
             @Override
             public void saveFailed(String username) { throw historyFailure; }
         });
-        assertSame(original, assertThrows(RuntimeException.class,
+        assertSame(historyFailure, assertThrows(RuntimeException.class,
                 () -> orchestrator.initiateImport(List.of(), "alice")));
-        assertArrayEquals(new Throwable[]{historyFailure}, original.getSuppressed());
     }
 
     private ImportService failingImport(RuntimeException failure) {

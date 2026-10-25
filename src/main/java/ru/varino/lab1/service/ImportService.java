@@ -25,6 +25,9 @@ public class ImportService {
     @Inject
     private HistoryService historyService;
 
+    @Inject
+    private MovieNameService movieNames;
+
     public int importMovies(List<Movie> movies, String username) {
         if (movies == null || movies.isEmpty()) {
             throw new ImportValidationException("Файл должен содержать непустой JSON-массив фильмов.");
@@ -48,6 +51,7 @@ public class ImportService {
                 throw new ImportValidationException(prefix + ": поля id у фильма и вложенных объектов должны отсутствовать.");
             }
         }
+        movieNames.check(movies, null);
         for (Movie movie : movies) {
             movieRepository.saveImported(movie);
         }

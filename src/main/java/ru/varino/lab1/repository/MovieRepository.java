@@ -50,6 +50,13 @@ public class MovieRepository {
         return session().createQuery("FROM Movie ORDER BY id", Movie.class).getResultList();
     }
 
+    public List<String> findNamesExcept(Integer excludedId) {
+        var query = session().createQuery("SELECT m.name FROM Movie m"
+                + (excludedId == null ? "" : " WHERE m.id <> :id"), String.class);
+        if (excludedId != null) query.setParameter("id", excludedId);
+        return query.getResultList();
+    }
+
     public Movie update(Movie movie) {
         return session().merge(movie);
     }
