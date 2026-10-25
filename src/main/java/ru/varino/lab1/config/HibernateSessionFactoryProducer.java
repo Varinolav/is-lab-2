@@ -20,7 +20,9 @@ public class HibernateSessionFactoryProducer {
                 .addResource("hibernate/Coordinates.hbm.xml")
                 .addResource("hibernate/Location.hbm.xml")
                 .addResource("hibernate/Person.hbm.xml")
-                .addResource("hibernate/Movie.hbm.xml");
+                .addResource("hibernate/Movie.hbm.xml")
+                .addResource("hibernate/AppUser.hbm.xml")
+                .addResource("hibernate/ImportOperation.hbm.xml");
         registry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())
                 .build();

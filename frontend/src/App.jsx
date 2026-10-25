@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { selectTableRows } from './tableData.js';
 import Operations from './Operations.jsx';
+import { api } from './api.js';
 
 const sections = [
   { key: 'movies', title: 'Фильмы', singular: 'фильм', endpoint: 'movies' },
@@ -81,28 +82,6 @@ const textColumns = {
   coordinates: [],
   locations: [{ key: 'name', label: 'Название', value: (item) => display(item.name) }],
 };
-
-async function api(path, options = {}) {
-  const response = await fetch(`/api/${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-  });
-  const raw = await response.text();
-  let data = raw;
-  if (raw) {
-    try { data = JSON.parse(raw); } catch {}
-  }
-  if (!response.ok) {
-    if (response.status === 404) throw new Error('Объект не найден. Обновите список.');
-    if (response.status === 409 || /foreign key|constraint.*references|still referenced/i.test(raw)) {
-      throw new Error('Этот объект используется другими записями. Сначала измените связанные записи.');
-    }
-    throw new Error(typeof data === 'string' && data.trim()
-      ? data.replace(/\[PARAMETER\]|\[\]/g, '').trim()
-      : `Ошибка сервера (${response.status}).`);
-  }
-  return data;
-}
 
 function initialForm(kind, item = {}) {
   if (kind === 'movies') return {

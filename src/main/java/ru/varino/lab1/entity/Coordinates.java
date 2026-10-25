@@ -12,8 +12,8 @@ import lombok.Setter;
 public class Coordinates {
     private Long id;
 
-    @NotNull
-    @DecimalMin(value = "-59", inclusive = false)
+    @NotNull(message = "Координата x обязательна.")
+    @DecimalMin(value = "-59", inclusive = false, message = "Координата x должна быть больше -59.")
     private Double x;
 
     private float y;

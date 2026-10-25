@@ -4,10 +4,14 @@ package ru.varino.lab1.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Validator;
+import ru.varino.lab1.exception.ImportValidationException;
 import ru.varino.lab1.entity.Movie;
+import ru.varino.lab1.entity.Person;
 import ru.varino.lab1.repository.MovieRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Transactional

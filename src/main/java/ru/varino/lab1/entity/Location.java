@@ -14,11 +14,11 @@ public class Location {
 
     private int x;
 
-    @NotNull
+    @NotNull(message = "Координата y местоположения обязательна.")
     private Double y;
 
     private double z;
 
-    @Size(min = 1)
+    @Size(min = 1, message = "Название местоположения не должно быть пустым.")
     private String name;
 }

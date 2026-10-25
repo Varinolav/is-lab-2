@@ -14,8 +14,8 @@ import lombok.Setter;
 public class Person {
     private Long id;
 
-    @NotNull
-    @Size(min = 1)
+    @NotNull(message = "Имя обязательно.")
+    @Size(min = 1, message = "Имя не должно быть пустым.")
     private String name;
 
     private Color eyeColor;
@@ -23,10 +23,10 @@ public class Person {
     private Color hairColor;
 
     @Valid
-    @NotNull
+    @NotNull(message = "Местоположение обязательно.")
     private Location location;
 
-    @Positive
+    @Positive(message = "Рост должен быть больше нуля.")
     private Double height;
 
     private Country nationality;

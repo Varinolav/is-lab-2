@@ -17,43 +17,43 @@ import java.time.LocalDateTime;
 public class Movie {
     private Integer id;
 
-    @NotNull
-    @Size(min = 1)
+    @NotNull(message = "Название фильма обязательно.")
+    @Size(min = 1, message = "Название фильма не должно быть пустым.")
     private String name;
 
     @Valid
-    @NotNull
+    @NotNull(message = "Координаты обязательны.")
     private Coordinates coordinates;
 
     private LocalDateTime creationDate;
 
-    @PositiveOrZero
+    @PositiveOrZero(message = "Количество премий «Оскар» должно быть неотрицательным.")
     private long oscarsCount;
 
-    @Positive
+    @Positive(message = "Бюджет должен быть больше нуля.")
     private Integer budget;
 
-    @Positive
+    @Positive(message = "Кассовые сборы должны быть больше нуля.")
     private Integer totalBoxOffice;
 
-    @NotNull
+    @NotNull(message = "Возрастной рейтинг обязателен.")
     private MpaaRating mpaaRating;
 
     @Valid
-    @NotNull
+    @NotNull(message = "Режиссёр обязателен.")
     private Person director;
 
     @Valid
     private Person screenwriter;
 
     @Valid
-    @NotNull
+    @NotNull(message = "Оператор обязателен.")
     private Person operator;
 
-    @Positive
+    @Positive(message = "Продолжительность фильма должна быть больше нуля.")
     private Long length;
 
-    @Positive
+    @Positive(message = "Количество премий «Золотая пальмовая ветвь» должно быть больше нуля.")
     private Integer goldenPalmCount;
 
     private MovieGenre genre;

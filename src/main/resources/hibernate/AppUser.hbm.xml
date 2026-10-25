@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="ru.varino.lab1.entity.AppUser" table="app_user">
+        <id name="username" type="string"><generator class="assigned"/></id>
+        <property name="passwordHash" column="password_hash" not-null="true"/>
+        <property name="role" not-null="true"/>
+    </class>
+</hibernate-mapping>

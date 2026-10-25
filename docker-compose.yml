@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: is-lab-1-postgres
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: admin
@@ -20,7 +19,6 @@ services:
 
   app:
     build: .
-    container_name: is-lab-1-wildfly
     ports:
       - "8080:8080"
       - "9990:9990"

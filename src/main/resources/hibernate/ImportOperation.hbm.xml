@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="ru.varino.lab1.entity.ImportOperation" table="import_operation">
+        <id name="id" type="java.lang.Long"><generator class="identity"/></id>
+        <property name="username" type="string" not-null="true"/>
+        <property name="status" not-null="true">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">ru.varino.lab1.entity.ImportStatus</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="creationDate" column="creation_date" type="java.time.LocalDateTime" not-null="true"/>
+        <property name="count" column="imported_count" type="java.lang.Long"/>
+    </class>
+</hibernate-mapping>

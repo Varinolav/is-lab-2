@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import ru.varino.lab1.entity.Movie;
+import ru.varino.lab1.entity.Person;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +24,22 @@ public class MovieRepository {
     public void save(Movie movie) {
         movie.setCreationDate(LocalDateTime.now());
         session().persist(movie);
+    }
+
+    public void saveImported(Movie movie) {
+        Session session = session();
+        session.persist(movie.getCoordinates());
+        persistImportedPerson(session, movie.getDirector());
+        persistImportedPerson(session, movie.getScreenwriter());
+        persistImportedPerson(session, movie.getOperator());
+        save(movie);
+    }
+
+    private void persistImportedPerson(Session session, Person person) {
+        if (person != null) {
+            session.persist(person.getLocation());
+            session.persist(person);
+        }
     }
 
     public Movie findById(Integer id) {
