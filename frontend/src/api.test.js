@@ -41,6 +41,14 @@ test('registration sends selected role and preserves duplicate-login message', a
   }), /Пользователь с таким логином уже существует/);
 });
 
+test('server errors show a readable message instead of HTML diagnostics', async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => { globalThis.fetch = original; });
+  globalThis.fetch = async () => new Response('<html>Internal server diagnostics</html>', { status: 500 });
+  await assert.rejects(api('movies/import', { method: 'POST', body: new FormData() }),
+    { message: 'Ошибка сервера. Не удалось выполнить запрос.' });
+});
+
 test('401 drops authenticated UI, invalid login only shows its error', async (t) => {
   const originalFetch = globalThis.fetch;
   const originalWindow = globalThis.window;

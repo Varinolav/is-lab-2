@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { selectTableRows } from './tableData.js';
 import Operations from './Operations.jsx';
+import ImportHistory from './ImportHistory.jsx';
 import { api } from './api.js';
 
 const sections = [
@@ -282,7 +283,7 @@ export default function App() {
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
-    if (active === 'operations') {
+    if (active === 'operations' || active === 'imports') {
       setItems([]);
       setLoading(false);
       return;
@@ -366,11 +367,17 @@ export default function App() {
           onClick={() => changeSection('operations')} aria-current={active === 'operations' ? 'page' : undefined}>
           Операции
         </button>
+        <button className={`nav-item ${active === 'imports' ? 'active' : ''}`}
+          onClick={() => changeSection('imports')} aria-current={active === 'imports' ? 'page' : undefined}>
+          История импортов
+        </button>
       </nav>
     </header>
 
     <main className="main-content">
-      {active === 'operations' ? <Operations request={api} onChanged={() => setRevision((value) => value + 1)} revision={revision} /> : <>
+      {active === 'operations' ? <Operations request={api} onChanged={() => setRevision((value) => value + 1)} revision={revision} />
+        : active === 'imports' ? <ImportHistory request={api} revision={revision}
+          onChanged={() => setRevision((value) => value + 1)} /> : <>
       <div className="page-actions">
         <button className="button primary add-button" onClick={() => openEditor()}>+ Добавить {section.singular}</button>
       </div>

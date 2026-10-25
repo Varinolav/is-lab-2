@@ -10,7 +10,6 @@ import ru.varino.lab1.repository.ImportRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static jakarta.transaction.Transactional.TxType.MANDATORY;
 import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 
 @ApplicationScoped

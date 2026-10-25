@@ -1,0 +1,109 @@
+[
+  {
+    "name": "MANUAL_VALID_01 — полный набор полей",
+    "coordinates": {
+      "x": 10,
+      "y": 20
+    },
+    "oscarsCount": 2,
+    "mpaaRating": "PG_13",
+    "director": {
+      "name": "MANUAL_VALID_01 — полный набор полей — режиссёр",
+      "location": {
+        "x": 1,
+        "y": 2,
+        "z": 3,
+        "name": "Локация режиссёра"
+      },
+      "eyeColor": "RED",
+      "hairColor": "WHITE",
+      "height": 175,
+      "nationality": "SPAIN"
+    },
+    "operator": {
+      "name": "MANUAL_VALID_01 — полный набор полей — оператор",
+      "location": {
+        "x": 4,
+        "y": 5,
+        "z": 6,
+        "name": "Локация оператора"
+      }
+    },
+    "budget": 1000000,
+    "totalBoxOffice": 2000000,
+    "length": 120,
+    "goldenPalmCount": 1,
+    "genre": "DRAMA",
+    "screenwriter": {
+      "name": "MANUAL_VALID_01 — сценарист",
+      "eyeColor": "BLUE",
+      "hairColor": "BROWN",
+      "height": 180,
+      "nationality": "RUSSIA",
+      "location": {
+        "x": 7,
+        "y": 8,
+        "z": 9,
+        "name": "Локация сценариста"
+      }
+    }
+  },
+  {
+    "coordinates": {
+      "x": 10,
+      "y": 20
+    },
+    "oscarsCount": 0,
+    "mpaaRating": "R",
+    "director": {
+      "name": "MANUAL_VALID_02 — без сценариста — режиссёр",
+      "location": {
+        "x": 1,
+        "y": 2,
+        "z": 3,
+        "name": "Локация режиссёра"
+      }
+    },
+    "operator": {
+      "name": "MANUAL_VALID_02 — без сценариста — оператор",
+      "location": {
+        "x": 4,
+        "y": 5,
+        "z": 6,
+        "name": "Локация оператора"
+      }
+    },
+    "genre": "THRILLER",
+    "length": 90
+  },
+  {
+    "name": "MANUAL_VALID_03 — приключения",
+    "coordinates": {
+      "x": 10,
+      "y": 20
+    },
+    "oscarsCount": 0,
+    "mpaaRating": "G",
+    "director": {
+      "name": "MANUAL_VALID_03 — приключения — режиссёр",
+      "location": {
+        "x": 1,
+        "y": 2,
+        "z": 3,
+        "name": "Локация режиссёра"
+      }
+    },
+    "operator": {
+      "name": "MANUAL_VALID_03 — приключения — оператор",
+      "location": {
+        "x": 4,
+        "y": 5,
+        "z": 6,
+        "name": "Локация оператора"
+      }
+    },
+    "genre": "ADVENTURE",
+    "budget": 1,
+    "length": 1
+  }
+]

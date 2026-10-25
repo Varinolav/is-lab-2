@@ -13,6 +13,7 @@ export async function api(path, options = {}) {
       window.dispatchEvent(new Event('session-expired'));
     }
     if (response.status === 401) throw new Error(data?.error || 'Необходимо войти в систему.');
+    if (response.status >= 500) throw new Error('Ошибка сервера. Не удалось выполнить запрос.');
     if (response.status === 404) throw new Error('Объект не найден. Обновите список.');
     if (response.status === 409 && (data?.error || data?.message)) throw new Error(data.error || data.message);
     if (response.status === 409 || /foreign key|constraint.*references|still referenced/i.test(raw)) {
