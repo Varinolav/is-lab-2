@@ -19,6 +19,7 @@ public class MovieService {
     private MovieNameService movieNames;
 
     public void save(Movie movie) {
+        movieRepository.useMovieWriteIsolation();
         movieNames.check(List.of(movie), null);
         movieRepository.save(movie);
     }
@@ -31,6 +32,7 @@ public class MovieService {
     }
 
     public Movie update(Integer id, Movie movie) {
+        movieRepository.useMovieWriteIsolation();
         if (movieRepository.findById(id) == null) {
             return null;
         }

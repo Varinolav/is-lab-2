@@ -51,6 +51,7 @@ public class ImportService {
                 throw new ImportValidationException(prefix + ": поля id у фильма и вложенных объектов должны отсутствовать.");
             }
         }
+        movieRepository.useMovieWriteIsolation();
         movieNames.check(movies, null);
         for (Movie movie : movies) {
             movieRepository.saveImported(movie);

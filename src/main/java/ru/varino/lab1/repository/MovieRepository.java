@@ -20,6 +20,14 @@ public class MovieRepository {
         return sessionFactory.getCurrentSession();
     }
 
+    public void useMovieWriteIsolation() {
+        session().doWork(connection -> {
+            try (var statement = connection.createStatement()) {
+                statement.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
+            }
+        });
+    }
+
 
     public void save(Movie movie) {
         movie.setCreationDate(LocalDateTime.now());
