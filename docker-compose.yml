@@ -24,7 +24,6 @@ services:
       - "9990:9990"
     environment:
       POSTGRES_HOST: postgres
-      MOVIE_WRITE_ISOLATION: ${MOVIE_WRITE_ISOLATION:-SERIALIZABLE}
       POSTGRES_PORT: 5432
       POSTGRES_DB: postgres
       POSTGRES_USER: admin

@@ -1,6 +1,6 @@
 [
   {
-    "name": "MANUAL_VALID_01 — полный набор полей",
+    "name": "Movie 1",
     "coordinates": {
       "x": 10,
       "y": 20
@@ -8,7 +8,7 @@
     "oscarsCount": 2,
     "mpaaRating": "PG_13",
     "director": {
-      "name": "MANUAL_VALID_01 — полный набор полей — режиссёр",
+      "name": "Director 1",
       "location": {
         "x": 1,
         "y": 2,
@@ -21,7 +21,7 @@
       "nationality": "SPAIN"
     },
     "operator": {
-      "name": "MANUAL_VALID_01 — полный набор полей — оператор",
+      "name": "Operator 1",
       "location": {
         "x": 4,
         "y": 5,
@@ -35,7 +35,7 @@
     "goldenPalmCount": 1,
     "genre": "DRAMA",
     "screenwriter": {
-      "name": "MANUAL_VALID_01 — сценарист",
+      "name": "Screenwriter 1",
       "eyeColor": "BLUE",
       "hairColor": "BROWN",
       "height": 180,
@@ -49,7 +49,7 @@
     }
   },
   {
-    "name": "MANUAL_VALID_02 — без сценариста",
+    "name": "Movie 2",
     "coordinates": {
       "x": 10,
       "y": 20
@@ -57,7 +57,7 @@
     "oscarsCount": 0,
     "mpaaRating": "R",
     "director": {
-      "name": "MANUAL_VALID_02 — без сценариста — режиссёр",
+      "name": "Director 2",
       "location": {
         "x": 1,
         "y": 2,
@@ -66,7 +66,7 @@
       }
     },
     "operator": {
-      "name": "MANUAL_VALID_02 — без сценариста — оператор",
+      "name": "Operator 2",
       "location": {
         "x": 4,
         "y": 5,
@@ -75,11 +75,10 @@
       }
     },
     "genre": "THRILLER",
-    "length": 90,
-    "id": 123
+    "length": 90
   },
   {
-    "name": "MANUAL_VALID_03 — приключения",
+    "name": "Movie 3",
     "coordinates": {
       "x": 10,
       "y": 20
@@ -87,7 +86,7 @@
     "oscarsCount": 0,
     "mpaaRating": "G",
     "director": {
-      "name": "MANUAL_VALID_03 — приключения — режиссёр",
+      "name": "Director 3",
       "location": {
         "x": 1,
         "y": 2,
@@ -96,7 +95,7 @@
       }
     },
     "operator": {
-      "name": "MANUAL_VALID_03 — приключения — оператор",
+      "name": "Operator 3",
       "location": {
         "x": 4,
         "y": 5,

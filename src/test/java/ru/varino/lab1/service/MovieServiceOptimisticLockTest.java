@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MovieServiceIsolationTest {
+class MovieServiceOptimisticLockTest {
     private final List<String> calls = new ArrayList<>();
     private MovieService service;
 
@@ -20,7 +20,7 @@ class MovieServiceIsolationTest {
         var repository = MovieService.class.getDeclaredField("movieRepository");
         repository.setAccessible(true);
         repository.set(service, new MovieRepository() {
-            @Override public void useMovieWriteIsolation() { calls.add("isolation"); }
+            @Override public void lockMovieNames() { calls.add("lock"); }
             @Override public Movie findById(Integer id) { calls.add("find"); return new Movie(); }
             @Override public List<Movie> findAll() { calls.add("list"); return List.of(); }
             @Override public void save(Movie movie) { calls.add("save"); }
@@ -35,19 +35,19 @@ class MovieServiceIsolationTest {
     }
 
     @Test
-    void updateSetsIsolationBeforeItsFirstRead() {
+    void updateLocksRegistryBeforeItsFirstRead() {
         service.update(1, new Movie());
-        assertEquals(List.of("isolation", "find", "check", "update"), calls);
+        assertEquals(List.of("lock", "find", "check", "update"), calls);
     }
 
     @Test
     void creationProtectsCheckAndWriteTogether() {
         service.save(new Movie());
-        assertEquals(List.of("isolation", "check", "save"), calls);
+        assertEquals(List.of("lock", "check", "save"), calls);
     }
 
     @Test
-    void readsAndDeletionDoNotRaiseIsolation() {
+    void readsAndDeletionDoNotLockNameRegistry() {
         service.findById(1);
         service.findAll();
         service.deleteById(1);

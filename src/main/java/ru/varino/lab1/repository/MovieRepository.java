@@ -2,9 +2,12 @@ package ru.varino.lab1.repository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.LockModeType;
+import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import ru.varino.lab1.entity.Movie;
+import ru.varino.lab1.entity.MovieNameRegistry;
 import ru.varino.lab1.entity.Person;
 
 import java.time.LocalDateTime;
@@ -20,14 +23,21 @@ public class MovieRepository {
         return sessionFactory.getCurrentSession();
     }
 
-    public void useMovieWriteIsolation() {
-        session().doWork(connection -> {
-            try (var statement = connection.createStatement()) {
-                statement.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
-            }
-        });
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void initializeNameRegistry() {
+        session().createNativeMutationQuery("INSERT INTO movie_name_registry (id, version) VALUES (:id, 0) "
+                        + "ON CONFLICT (id) DO NOTHING")
+                .setParameter("id", MovieNameRegistry.ID)
+                .executeUpdate();
     }
 
+    public void lockMovieNames() {
+        MovieNameRegistry registry = session().find(MovieNameRegistry.class, MovieNameRegistry.ID,
+                LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+        if (registry == null) {
+            throw new IllegalStateException("Реестр названий фильмов не инициализирован.");
+        }
+    }
 
     public void save(Movie movie) {
         movie.setCreationDate(LocalDateTime.now());

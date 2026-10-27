@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import ru.varino.lab1.entity.MovieNameRegistry;
 
 @ApplicationScoped
 public class HibernateSessionFactoryProducer {
@@ -17,6 +18,7 @@ public class HibernateSessionFactoryProducer {
     @ApplicationScoped
     public SessionFactory sessionFactory() {
         Configuration configuration = new Configuration().configure()
+                .addAnnotatedClass(MovieNameRegistry.class)
                 .addResource("hibernate/Coordinates.hbm.xml")
                 .addResource("hibernate/Location.hbm.xml")
                 .addResource("hibernate/Person.hbm.xml")
