@@ -1,0 +1,981 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Простой тест v2: конфликты и повтор импорта">
+      <stringProp name="TestPlan.comments">Запускать на тестовой БД. Создает двух администраторов и тестовые данные. Два потока, один проход.</stringProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="Настройки">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="host" elementType="Argument">
+            <stringProp name="Argument.name">host</stringProp>
+            <stringProp name="Argument.value">localhost</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="port" elementType="Argument">
+            <stringProp name="Argument.name">port</stringProp>
+            <stringProp name="Argument.value">8080</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="base" elementType="Argument">
+            <stringProp name="Argument.name">base</stringProp>
+            <stringProp name="Argument.value">/api</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <SetupThreadGroup guiclass="ThreadGroupGui" testclass="SetupThreadGroup" testname="Подготовка номера запуска">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Один проход">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </SetupThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Новый номер запуска" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">props.put(&apos;jm.run&apos;, UUID.randomUUID().toString())</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="2 администратора — 1 проход">
+        <intProp name="ThreadGroup.num_threads">2</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Один проход">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="Сессия каждого пользователя" enabled="true">
+          <collectionProp name="CookieManager.cookies"/>
+          <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+          <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
+        </CookieManager>
+        <hashTree/>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Имена тестовых данных" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">vars.put(&apos;run&apos;, props.getProperty(&apos;jm.run&apos;))
+vars.put(&apos;user&apos;, &apos;jm_&apos; + vars.get(&apos;run&apos;) + &apos;_&apos; + ctx.threadNum)
+vars.put(&apos;number&apos;, (ctx.threadNum + 1).toString())</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01 Регистрация администратора" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/auth/register</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;username&quot;:&quot;${user}&quot;,&quot;password&quot;:&quot;jmeter123&quot;,&quot;role&quot;:&quot;ADMIN&quot;}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;201&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="02 Вход" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/auth/login</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;username&quot;:&quot;${user}&quot;,&quot;password&quot;:&quot;jmeter123&quot;}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;200&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="03 Создать координаты" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/coordinates</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;x&quot;:10,&quot;y&quot;:20}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;201&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    vars.put(&apos;coordinates&apos;, groovy.json.JsonOutput.toJson(data))
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="04 Создать локацию" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/locations</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;x&quot;:1,&quot;y&quot;:2,&quot;z&quot;:3,&quot;name&quot;:&quot;JMeter&quot;}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;201&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    vars.put(&apos;location&apos;, groovy.json.JsonOutput.toJson(data))
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="05 Создать человека" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/persons</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;name&quot;:&quot;JMeter&quot;,&quot;location&quot;:${location}}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;201&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    vars.put(&apos;person&apos;, groovy.json.JsonOutput.toJson(data))
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="06 Одновременно создать одинаковое название" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;name&quot;:&quot;JMeter-${run}&quot;,&quot;coordinates&quot;:${coordinates},&quot;director&quot;:${person},&quot;operator&quot;:${person},&quot;mpaaRating&quot;:&quot;G&quot;,&quot;oscarsCount&quot;:0,&quot;budget&quot;:100,&quot;length&quot;:100}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    props.put(&apos;jm.create.&apos; + vars.get(&apos;run&apos;) + &apos;.&apos; + ctx.threadNum, prev.responseCode)
+    def allowed = &apos;201,409&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="07 Проверить уникальность и получить общий фильм" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;200&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    def run = vars.get(&apos;run&apos;)
+    def found = data.findAll { it.name == &apos;JMeter-&apos; + run }
+    assert found.size() == 1 : &apos;Должен существовать ровно один фильм&apos;
+    vars.put(&apos;id&apos;, found[0].id.toString())
+    vars.put(&apos;movie&apos;, groovy.json.JsonOutput.toJson(found[0]))
+    assert (0..1).collect { props.getProperty(&apos;jm.create.&apos; + run + &apos;.&apos; + it) }.sort() == [&apos;201&apos;,&apos;409&apos;] : &apos;Должны быть один успех 201 и один конфликт 409&apos;
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="08 Одновременно изменить один фильм" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies/${id}</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${update}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    props.put(&apos;jm.update.&apos; + vars.get(&apos;run&apos;) + &apos;.&apos; + ctx.threadNum, prev.responseCode)
+    def allowed = &apos;200,409&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Подготовить изменение" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">def m = new groovy.json.JsonSlurper().parseText(vars.get(&apos;movie&apos;))
+m.budget = vars.get(&apos;number&apos;).toInteger() * 100
+m.length = vars.get(&apos;number&apos;).toInteger() * 100
+vars.put(&apos;update&apos;, groovy.json.JsonOutput.toJson(m))</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="09 Проверить результат изменения" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies/${id}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;200&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    assert (0..1).any { props.getProperty(&apos;jm.update.&apos; + vars.get(&apos;run&apos;) + &apos;.&apos; + it) == &apos;200&apos; } : &apos;Нет успешного обновления&apos;
+    assert data.budget in [100,200]
+    assert data.length == data.budget : &apos;Смешались данные двух обновлений&apos;
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="10 Одновременно удалить один фильм" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies/${id}</stringProp>
+          <stringProp name="HTTPSampler.method">DELETE</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    props.put(&apos;jm.delete.&apos; + vars.get(&apos;run&apos;) + &apos;.&apos; + ctx.threadNum, prev.responseCode)
+    def allowed = &apos;204,404,409&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="11 Убедиться, что фильм удален" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies/${id}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;404&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def codes = (0..1).collect { props.getProperty(&apos;jm.delete.&apos; + vars.get(&apos;run&apos;) + &apos;.&apos; + it) }.sort()
+    assert codes in [[&apos;204&apos;,&apos;404&apos;], [&apos;204&apos;,&apos;409&apos;]] : &apos;Ожидались одно удаление 204 и один ответ 404 или 409: &apos; + codes
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="12 Одновременно импортировать по фильму" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies/import</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">--JMeterBoundary&#xd;
+Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;movies.json&quot;&#xd;
+Content-Type: application/json&#xd;
+&#xd;
+[{&quot;name&quot;:&quot;Import-${user}&quot;,&quot;coordinates&quot;:{&quot;x&quot;:10,&quot;y&quot;:20},&quot;director&quot;:{&quot;name&quot;:&quot;Director&quot;,&quot;location&quot;:{&quot;x&quot;:1,&quot;y&quot;:2,&quot;z&quot;:3}},&quot;operator&quot;:{&quot;name&quot;:&quot;Operator&quot;,&quot;location&quot;:{&quot;x&quot;:4,&quot;y&quot;:5,&quot;z&quot;:6}},&quot;mpaaRating&quot;:&quot;G&quot;,&quot;oscarsCount&quot;:0}]&#xd;
+--JMeterBoundary--&#xd;
+</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">multipart/form-data; boundary=JMeterBoundary</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    vars.put(&apos;importCode&apos;, prev.responseCode)
+    assert prev.responseCode in [&apos;201&apos;,&apos;409&apos;] : &apos;Неожиданный HTTP &apos; + prev.responseCode
+    if (prev.responseCode == &apos;201&apos;) {
+        def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+        assert data.importedCount == 1
+    }
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Повторить один раз, если импорт вернул 409" enabled="true">
+          <stringProp name="IfController.condition">${__groovy(vars.get(&apos;importCode&apos;) == &apos;409&apos;)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="12а Повторить импорт после 409" enabled="true">
+            <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+            <intProp name="HTTPSampler.response_timeout">30000</intProp>
+            <stringProp name="HTTPSampler.domain">${host}</stringProp>
+            <stringProp name="HTTPSampler.port">${port}</stringProp>
+            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+            <stringProp name="HTTPSampler.path">${base}/movies/import</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">--JMeterBoundary&#xd;
+Content-Disposition: form-data; name=&quot;file&quot;; filename=&quot;movies.json&quot;&#xd;
+Content-Type: application/json&#xd;
+&#xd;
+[{&quot;name&quot;:&quot;Import-${user}&quot;,&quot;coordinates&quot;:{&quot;x&quot;:10,&quot;y&quot;:20},&quot;director&quot;:{&quot;name&quot;:&quot;Director&quot;,&quot;location&quot;:{&quot;x&quot;:1,&quot;y&quot;:2,&quot;z&quot;:3}},&quot;operator&quot;:{&quot;name&quot;:&quot;Operator&quot;,&quot;location&quot;:{&quot;x&quot;:4,&quot;y&quot;:5,&quot;z&quot;:6}},&quot;mpaaRating&quot;:&quot;G&quot;,&quot;oscarsCount&quot;:0}]&#xd;
+--JMeterBoundary--&#xd;
+</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">multipart/form-data; boundary=JMeterBoundary</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">try {
+    def allowed = &apos;201&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    assert data.importedCount == 1
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+            </JSR223Assertion>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="13 Проверить импорт" enabled="true">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">30000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей" enabled="true">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">15000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    def allowed = &apos;200&apos;.split(&apos;,&apos;).toList()
+    assert prev.responseCode in allowed : &apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + prev.responseDataAsString
+    prev.setSuccessful(true)
+    def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    (0..1).each { n -&gt;
+      def name = &apos;Import-jm_&apos; + vars.get(&apos;run&apos;) + &apos;_&apos; + n
+      assert data.count { it.name == name } == 1 : &apos;Не найден импортированный фильм: &apos; + name
+    }
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(&apos;HTTP &apos; + prev.responseCode + &apos;: &apos; + e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="14 Импорт concurrency A/B — по 2000 фильмов">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">300000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies/import</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${bulkBody}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">multipart/form-data; boundary=JMeterBoundary</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">360000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    props.put(&apos;jm.bulk.&apos; + vars.get(&apos;run&apos;) + &apos;.&apos; + ctx.threadNum, prev.responseCode)
+    assert prev.responseCode in [&apos;201&apos;,&apos;409&apos;] : &apos;Неожиданный HTTP &apos; + prev.responseCode
+    if (prev.responseCode == &apos;201&apos;) {
+        def data = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+        assert data.importedCount == 2000 : &apos;Должно импортироваться 2000 фильмов&apos;
+    }
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(e.message + &apos;\nResponse: &apos; + prev.responseDataAsString.take(2000))
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Прочитать свой файл и добавить номер запуска">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">def letter = ctx.threadNum == 0 ? &apos;a&apos; : &apos;b&apos;
+def baseDir = new File(org.apache.jmeter.services.FileServer.getFileServer().getBaseDir())
+def file = new File(baseDir, &apos;../import/concurrency-&apos; + letter + &apos;-2000.json&apos;).canonicalFile
+assert file.isFile() : &apos;Не найден файл: &apos; + file
+ def movies = new groovy.json.JsonSlurper().parse(file, &apos;UTF-8&apos;)
+assert movies.size() == 2000
+movies.each { it.name = &apos;Bulk-&apos; + vars.get(&apos;run&apos;) + &apos;-&apos; + it.name }
+vars.put(&apos;bulkNames&apos;, groovy.json.JsonOutput.toJson(movies.collect { it.name }))
+def json = groovy.json.JsonOutput.toJson(movies)
+vars.put(&apos;bulkBody&apos;, &apos;--JMeterBoundary\r\nContent-Disposition: form-data; name=&quot;file&quot;; filename=&quot;concurrency-&apos; + letter + &apos;-2000.json&quot;\r\nContent-Type: application/json\r\n\r\n&apos; + json + &apos;\r\n--JMeterBoundary--\r\n&apos;)
+</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="15 Проверить 2000 фильмов и полный откат второго файла">
+          <intProp name="HTTPSampler.connect_timeout">5000</intProp>
+          <intProp name="HTTPSampler.response_timeout">300000</intProp>
+          <stringProp name="HTTPSampler.domain">${host}</stringProp>
+          <stringProp name="HTTPSampler.port">${port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.path">${base}/movies</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Content-Type">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Дождаться обоих пользователей">
+            <intProp name="groupSize">2</intProp>
+            <longProp name="timeoutInMs">360000</longProp>
+          </SyncTimer>
+          <hashTree/>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Проверка результата">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">try {
+    assert prev.responseCode == &apos;200&apos; : &apos;Неожиданный HTTP &apos; + prev.responseCode
+    def run = vars.get(&apos;run&apos;)
+    def codes = (0..1).collect { props.getProperty(&apos;jm.bulk.&apos; + run + &apos;.&apos; + it) }.sort()
+    assert codes == [&apos;201&apos;,&apos;409&apos;] : &apos;Ожидались один успех 201 и один конфликт 409: &apos; + codes
+    def movies = new groovy.json.JsonSlurper().parseText(prev.responseDataAsString)
+    def imported = movies.findAll { it.name.startsWith(&apos;Bulk-&apos; + run + &apos;-&apos;) }
+    assert imported.size() == 2000 : &apos;Ожидалось ровно 2000 фильмов, найдено: &apos; + imported.size()
+    def names = imported.collect { it.name }.toSet()
+    assert names.size() == 2000 : &apos;Найдены повторяющиеся названия&apos;
+    def ownNames = new groovy.json.JsonSlurper().parseText(vars.get(&apos;bulkNames&apos;)).toSet()
+    def ownCode = props.getProperty(&apos;jm.bulk.&apos; + run + &apos;.&apos; + ctx.threadNum)
+    if (ownCode == &apos;201&apos;) {
+        assert names == ownNames : &apos;Успешный файл сохранен не полностью&apos;
+    } else {
+        def present = ownNames.intersect(names)
+        assert present.size() == 1 : &apos;После отката остались фильмы второго файла: &apos; + present.size()
+        assert present.first().endsWith(&apos;_SHARED_MOVIE&apos;) : &apos;Сохранился фильм из отмененного импорта&apos;
+    }
+    prev.setSuccessful(true)
+} catch (AssertionError | Exception e) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage(e.message)
+}</stringProp>
+          </JSR223Assertion>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Результаты запросов">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
